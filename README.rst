@@ -1,0 +1,1 @@
+Carton-Fulcrum Torque Vector (CFTV) is a program that visualises an egg carton atop a fulcrum. It calculates the direction and the magnitude, shown as the resultant torque vector 
