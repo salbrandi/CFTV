@@ -2,8 +2,8 @@
 Carton-Fulcrum Torque Vector (CFTV) is a program that visualises an egg carton atop a fulcrum. It calculates the direction and the magnitude, shown as the resultant torque vector 
 '''
 
-carton_w = 50 # The carton width, in # of sockets
-carton_h = 2 # the carton height, in # of sickets
+carton_w = 6 # The carton width, in # of sockets
+carton_h = 8 # the carton height, in # of sickets
 cartonsize = carton_h*carton_w
 carton = [int(round(random(0, 1))) for x in range(cartonsize)] #generate a random carton
 eggsize = 40 # arbitrary adjustable egg diameter, in pixels
@@ -17,10 +17,12 @@ inch_meter = 0.0254 # inch to meter ratio
 conv = socketsize/2
 pixel_inch = socketsize/2 # pixel to inch ratio. A carton is about a foot long, / by six to get 2 inches per egg socket, each socket is divided by two to get pixel>inch. 25 for our purposes. 
 fulltq= []
-fulc_x_coord = socketsize*(carton_w/2) + socketsize/2 # These Two
-fulc_y_coord = socketsize*(carton_h/2) + socketsize/2   # Lines will create a fulcrum in the middle of the carton
-window_x = int(socketsize*(carton_w)*2) # set the window size
-window_y = int(socketsize*(carton_h)*(1 + carton_w+1/(carton_h))) # set the window size
+fulc_x_coord = (socketsize*carton_w)/2 + socketsize/2 # These Two
+fulc_y_coord = (socketsize*carton_h)/2 + socketsize/2   # Lines will create a fulcrum in the middle of the carton
+window_x = socketsize*(carton_w)*(3) # set the window size
+window_y = socketsize*(carton_h)*(3) # set the window size
+
+
 
 def draw():
     if keyPressed:     #
@@ -36,6 +38,44 @@ def setup():
     textAlign(CENTER)
     textSize(14) # set the font size
     background(155, 110, 90) # set the background to brown
+    carton()
+    #centroid()
+    
+def centroid():
+    
+    number_of_vertices = 3
+    vertice_max = 200
+    vertice_min = 1
+    vertices = [(random(vertice_min, vertice_max), random(vertice_min, vertice_max)) for r in range(number_of_vertices)]
+    highest_vertice = [0, 0]
+    counter_vertice = [x for x in range(number_of_vertices)]
+    chv = [x for x in range(number_of_vertices)]
+    
+    for v in vertices:
+        arrow(width/2, height/2, v[0], v[1])
+        if v[0] > highest_vertice[0]:
+            highest_vertice[0] = v[0]
+            chv[0] = v[0]
+        if v[1] > highest_vertice[1]:
+            highest_vertice[1] = v[1]
+            chv[1] = v[1]
+
+    vert_sum = [0, 0]
+    for r in range(len(vertices)):
+        if r != len(vertices):
+            counter_vertice[r] = (random(chv[0]), random(chv[1]))
+            chv = [counter_vertice[r][0], counter_vertice[r][1]]
+            vert_sum[0] += counter_vertice[r][0]
+            vert_sum[1] += counter_vertice[r][1]
+            
+        elif r == len(vertices):
+            for v in counter_vertice[r]:
+                counter_vertice[r] = (highest_vertice[0]-vert_sum[0], highest_vertice[1]-vert_sum[1])
+        arrow(width/2, height/2, counter_vertice[r][0], counter_vertice[r][1])
+        
+            
+
+def carton():
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
     carton = [round(random(0, 1)) for x in range(cartonsize)] #  change this to change how the carton is generated ~~~~~ #
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
@@ -47,7 +87,7 @@ def setup():
     for ind, egg in enumerate(carton): # iterate through the carton list and create the eggs where they have been placed by the carton list comprehension
         if egg == 1:
                 fill(255)
-                ellipse(egg_x[ind]+socketsize, egg_y[ind]+socketsize*0.9, eggsize, eggsize+int(eggsize/5))
+                gegg(egg_x[ind]+socketsize, egg_y[ind]+socketsize*0.9)
     
     #For each egg in the carton, calculate the torque based on fulcrum position
     x2 = fulc_x_coord
@@ -58,7 +98,7 @@ def setup():
         torq = calc_torque(egg_weight, x2, y2, x1, y1)
         direction = [torq*((x2-x1)),torq*((y2-y1))] # torque x the distance vector
         if space == 1: # if the space in the list is a 1 (indicating an egg)
-            torques[ind] = [torq*(x2-x1),torq*(y2-y1)] # add the calculated torque to the torque list
+            torques[ind] = [(x2-x1), (y2-y1)] # add the calculated torque to the torque list
         else:
             torques[ind] = 0
             
@@ -71,7 +111,7 @@ def setup():
             torq = calc_torque(egg_weight, fulc_x_coord, fulc_y_coord, egg_x[ind]+socketsize, egg_y[ind]+socketsize)
             print(tq)
             if tq != 0:
-                    fulltq.append([tq[0]/torq, tq[1]/torq])
+                    fulltq.append([tq[0], tq[1]])
     count = 0
     for i, t in enumerate(fulltq):
         count = i
@@ -138,6 +178,9 @@ def arrow(x1, y1, x2, y2, col1=255, col2=0, col3=0):
     noStroke()
 
      
+def gegg(x, y):
+    ellipse(x, y, eggsize, eggsize+(eggsize/5))
+
 
 def calc_torque(weight, fulc_y, fulc_x, pos_y, pos_x):
     '''
